@@ -8,6 +8,9 @@ public class MainApp : MonoBehaviour {
 	public float cameraToCeiling = 60.0f;
 	public float spawnOffset = 5.0f;
 	public Light pointLight;
+	public GameObject mainWrapper;
+
+	private Vector3 worldOffset = Vector3.zero;
 
 	// determine a random color
 	private string randomColor
@@ -36,12 +39,14 @@ public class MainApp : MonoBehaviour {
 	}
 
 	void SetUpWorld() {
-		Vector3 cameraPos = mainCamera.transform.position;
-		cameraPos.y = wallHeight + cameraToCeiling;
-		mainCamera.transform.position = cameraPos;
+		worldOffset = mainWrapper.transform.position;
 
-		Vector3 bottomLeft = mainCamera.ViewportToWorldPoint(new Vector3 (0, 0, cameraToCeiling));
-		Vector3 upperRight = mainCamera.ViewportToWorldPoint(new Vector3 (1, 1, cameraToCeiling));
+		Vector3 cameraPos = mainCamera.transform.localPosition;
+		cameraPos.y = wallHeight + cameraToCeiling;
+		mainCamera.transform.localPosition = cameraPos;
+
+		Vector3 bottomLeft = mainCamera.ViewportToWorldPoint(new Vector3 (0, 0, cameraToCeiling)) - worldOffset;
+		Vector3 upperRight = mainCamera.ViewportToWorldPoint(new Vector3 (1, 1, cameraToCeiling)) - worldOffset;
 
 		Debug.Log (bottomLeft);
 		Debug.Log (upperRight);
@@ -54,7 +59,7 @@ public class MainApp : MonoBehaviour {
 			new Vector3(0, wallHeight, 0),
 			new Vector3 (worldWidth, 0, worldHeight));
 
-		pointLight.transform.position = new Vector3 (bottomLeft.x, wallHeight, bottomLeft.z);
+		pointLight.transform.localPosition = new Vector3 (bottomLeft.x, wallHeight, bottomLeft.z);
 		pointLight.range = Mathf.Sqrt(wallHeight * wallHeight + worldWidth * worldWidth + worldHeight * worldHeight);
 
 		float wallY = wallHeight / 2;
@@ -74,7 +79,7 @@ public class MainApp : MonoBehaviour {
 
 	void SpawnSample() {
 		Vector3 spawnPoint = new Vector3(0, wallHeight - spawnOffset, 0);
-		DiceController.SpawnDices ("1d6", "d6-" + randomColor + "-dots", spawnPoint);
+		DiceController.SpawnDices ("1d6", "d6-" + randomColor + "-dots", spawnPoint, mainWrapper);
 	}
 
 	void MoveAndScale(GameObject obj, Vector3 position, Vector3 scale) {
@@ -92,9 +97,9 @@ public class MainApp : MonoBehaviour {
 		if (Input.touchCount > 0) {
 			Touch touch = Input.GetTouch (0);
 			if (touch.phase == TouchPhase.Began) {
-				Vector3 spawnPoint = mainCamera.ScreenToWorldPoint(new Vector3 (touch.position.x, touch.position.y, cameraToCeiling - spawnOffset));
+				Vector3 spawnPoint = mainCamera.ScreenToWorldPoint(new Vector3 (touch.position.x, touch.position.y, cameraToCeiling - spawnOffset)) - worldOffset;
 				spawnPoint.y = wallHeight - spawnOffset;
-				DiceController.SpawnDices ("1d6", "d6-" + randomColor + "-dots", spawnPoint);
+				DiceController.SpawnDices ("1d6", "d6-" + randomColor + "-dots", spawnPoint, mainWrapper);
 			}
 		}
 	}

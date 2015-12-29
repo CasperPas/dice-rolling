@@ -29,7 +29,7 @@ public class DiceController : MonoBehaviour {
 	/// format dice 			: 	({count}){die type}	, exmpl.  d6, 4d4, 12d8 , 1d20
 	/// possible die types 	:	d4, d6, d8 , d10, d12, d20
 	/// </summary>
-	public static void SpawnDices(string dice, string mat, Vector3 spawnPoint) {
+	public static void SpawnDices(string dice, string mat, Vector3 spawnPoint, GameObject parentObject) {
 		rolling = true;
 		// sotring dice to lowercase for comparing purposes
 		dice = dice.ToLower();				
@@ -62,6 +62,10 @@ public class DiceController : MonoBehaviour {
 				die.transform.Rotate(new Vector3(Random.value * 360, Random.value * 360, Random.value * 360));
 				// inactivate this gameObject because activating it will be handeled using the rollQueue and at the apropriate time
 				die.SetActive(true);
+				// put dice as child of another object
+				if (parentObject != null) {
+					die.transform.SetParent (parentObject.transform, false);
+				}
 				DiceInfo diceInfo = new DiceInfo(die, dieType, mat);
 				// add allDices list
 				allDice.Add(diceInfo);
